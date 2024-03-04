@@ -17,7 +17,6 @@ public:
             // 定长内存块的大小必须能放得下一个地址（32位是4字节，64位是8字节）
             size_t objSize = sizeof(T) < sizeof(void*) ? sizeof(void*) : sizeof(T);
             if(_remainBytes < objSize){
-                cout<<"test"<<endl;
                 // 是否需要先释放掉_memory剩余不够的内存？不需要，最多产生一些小浪费
                 _remainBytes = 128 * 1024; // 2^8 * 2^10 = 128KB = 64Page (4KB/Page)
                 lst.push_front(std::make_pair(_memory, _remainBytes >> PAGE_SHIFT));

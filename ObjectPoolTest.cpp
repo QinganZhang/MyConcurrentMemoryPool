@@ -14,7 +14,7 @@ void TestObjectPool(){
 	// 申请释放的轮次
 	const size_t Rounds = 3;
 	// 每轮申请释放多少次
-	const size_t N = 100000;
+	const size_t N = 200000;
 	std::vector<TreeNode*> v1;
 	v1.reserve(N);
 
@@ -53,8 +53,8 @@ void TestObjectPool(){
 	}
 	size_t end2 = clock();
 
-	cout << "new/delete cost time:" << end1 - begin1 << endl;
-	cout << "ObjectPool cost time:" << end2 - begin2 << endl;
+	cout << "new/delete cost time: " << (end1 - begin1) / (double)CLOCKS_PER_SEC << "ms" << endl;
+	cout << "ObjectPool cost time: " << (end2 - begin2) / (double)CLOCKS_PER_SEC << "ms" << endl;
 }
 
 int main(){
