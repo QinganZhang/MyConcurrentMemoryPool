@@ -4,6 +4,7 @@
 struct TreeNode
 {
 	int _val;
+	int a[500];
 	TreeNode* _left;
 	TreeNode* _right;
 	TreeNode() :_val(0), _left(nullptr), _right(nullptr) {}
@@ -13,7 +14,7 @@ void TestObjectPool(){
 	// 申请释放的轮次
 	const size_t Rounds = 3;
 	// 每轮申请释放多少次
-	const size_t N = 10000;
+	const size_t N = 100000;
 	std::vector<TreeNode*> v1;
 	v1.reserve(N);
 
@@ -34,7 +35,7 @@ void TestObjectPool(){
 	size_t end1 = clock();
 
 	//定长内存池
-	ObjectPool<TreeNode> TNPool;
+	ObjectPool<TreeNode> TNPool; // TreeNode的Generator
 	std::vector<TreeNode*> v2;
 	v2.reserve(N);
 	size_t begin2 = clock();

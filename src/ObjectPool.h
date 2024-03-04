@@ -17,8 +17,10 @@ public:
             // 定长内存块的大小必须能放得下一个地址（32位是4字节，64位是8字节）
             size_t objSize = sizeof(T) < sizeof(void*) ? sizeof(void*) : sizeof(T);
             if(_remainBytes < objSize){
-                // 是否需要先释放掉_memory剩余不够的内存？如果objSize无法被_remainBytes整除，则有一些内存泄漏
-                _remainBytes = 128 * 1024; // 2^8 * 2^10 = 128KB
+                cout<<"test"<<endl;
+                // 是否需要先释放掉_memory剩余不够的内存？不需要，最多产生一些小浪费
+                _remainBytes = 128 * 1024; // 2^8 * 2^10 = 128KB = 64Page (4KB/Page)
+                lst.push_front(std::make_pair(_memory, _remainBytes >> PAGE_SHIFT));
                 _memory = (char*)SystemAlloc(_remainBytes >> PAGE_SHIFT); 
                 if(_memory == nullptr) {
                     throw std::bad_alloc();
@@ -43,8 +45,15 @@ public:
         _freeList = obj;
     }
 
+    ~ObjectPool(){
+        for(auto& it: lst){
+            SystemFree(it.first, it.second); // 析构函数中显式将每次申请的大块内存释放
+        }
+    }
+
 private:
     char* _memory = nullptr; // 指向大块内存的指针
     size_t _remainBytes = 0; // 大块内存在切分过程中剩余的字节数量 
     void *_freeList = nullptr; // 释放回来的定长内存块组成的链表的指针
+    std::list<std::pair<char*, size_t>> lst; // 记录不断创建的大块内存及其大小，用于销毁内存池时的释放
 };
