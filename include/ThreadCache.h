@@ -21,9 +21,11 @@ private:
 };
 
 // 使用线程局部存储(TLS, Thread Local Storage)，使用该方法存储的变量在它所在的线程中是全局可访问的，但是不能被其他线程访问到
-#if defined(_WIN32) || defined(_WIN64)
-    static __declspec(thread) ThreadCache* pTLSThreadCache = nullptr;
-#else 
-    static __thread ThreadCache* pTLSThreadCache = nullptr;
-#endif
+static thread_local ThreadCache* pTLSThreadCache = nullptr;
+// #if defined(_WIN32) || defined(_WIN64)
+//     // static __declspec(thread) ThreadCache* pTLSThreadCache = nullptr;
+//     static thread_local ThreadCache* pTLSThreadCache = nullptr;
+// #else 
+//     static __thread ThreadCache* pTLSThreadCache = nullptr;
+// #endif
 
