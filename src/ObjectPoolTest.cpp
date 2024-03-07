@@ -56,7 +56,7 @@ void TestObjectPool(){
 	cout << "ObjectPool cost time: " << (end2 - begin2) / (double)CLOCKS_PER_SEC << "ms" << endl;
 }
 
-int main(){
-    TestObjectPool();
-    return 0;
-}
+// int main(){
+//     TestObjectPool();
+//     return 0;
+// }

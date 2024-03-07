@@ -10,11 +10,14 @@ public:
         return &_sInst;
     }
     
-    // 从central cache中获取n个size大小的内存块, [start, end]
-    size_t FetchRangeObj(void*& start, void*& end, size_t n, size_t size); 
+    // 从central cache中获取n个alignedBytes大小的内存块, [start, end]
+    size_t FetchRangeObj(void*& start, void*& end, size_t n, size_t alignedBytes); 
 
-    // 从central cache对应的哈希桶中获取一个非空的span
-    Span* GetOneSpan(SpanList& spanList, size_t size);
+    // 从central cache中alignedBytes大小内存块对应的哈希桶中寻找一个非空的span
+    Span* GetOneSpan(SpanList& spanList, size_t alignedBytes);
+
+    // 从thread cache中回收n个alignedBytes大小的内存块
+    void ReturnRangeObj(void* start, void* end, size_t n, size_t alignedBytes);
 private:
     CentralCache() =default;
     CentralCache(const CentralCache&) =delete;

@@ -1,20 +1,21 @@
 #pragma once
 
 #include "Common.h"
+#include "ObjectPool.h"
 
 class ThreadCache{
 public:
     // 申请内存
-    void* Allocate(size_t size);
+    void* Allocate(size_t bytes);
     
     // 释放对象，回收内存
-    void Deallocate(void* ptr, size_t size);
+    void Deallocate(void* ptr, size_t bytes);
 
-    // 从CentralCache中申请内存
-    void* FetchFromCentralCache(size_t index, size_t size);
+    // 从CentralCache中申请内存，添加到freeList
+    void* FetchFromCentralCache(FreeList& freeList, size_t alignedBytes);
     
-    // 回收内存累计到一定大小时，将多余的内存归还到CentralCache
-    void ReturnBackToCentralCache(FreeList& list, size_t size);
+    // 当freeList过于长时，将一部分的内存归还到CentralCache
+    void ReturnBackToCentralCache(FreeList& freeList, size_t alignedBytes);
 
 private:
     FreeList _freeLists[N_FREE_LISTS]; // 哈希桶，即一个数组，数组中每个元素都是一个链表
@@ -29,3 +30,5 @@ static thread_local ThreadCache* pTLSThreadCache = nullptr;
 //     static __thread ThreadCache* pTLSThreadCache = nullptr;
 // #endif
 
+static std::mutex tcMtx;
+static ObjectPool<ThreadCache> tcPool;
