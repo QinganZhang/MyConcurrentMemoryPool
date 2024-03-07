@@ -64,6 +64,8 @@ Span* PageCache::NewSpan(size_t k){
 Span* PageCache::MapObj2Span(void *obj){
     PAGE_ID pageId = (PAGE_ID) obj >> PAGE_SHIFT;
     
+    // 如果是在page cache中使用MapObj2Span，因为进入到page cache中会加锁，所以是安全的
+    // 但是如果在page cache外使用MapObj2Span，多个线程可能同时使用MapObj2Span
     std::unique_lock<std::mutex> lock(_pageMtx); // 构造时加锁，析构时解锁
 
     if(_page2SpanMap.find(pageId) != _page2SpanMap.end())
