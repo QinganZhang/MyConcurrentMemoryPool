@@ -30,5 +30,3 @@ static thread_local ThreadCache* pTLSThreadCache = nullptr;
 //     static __thread ThreadCache* pTLSThreadCache = nullptr;
 // #endif
 
-static std::mutex tcMtx;
-static ObjectPool<ThreadCache> tcPool;

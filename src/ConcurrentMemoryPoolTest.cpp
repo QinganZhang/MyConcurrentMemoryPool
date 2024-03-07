@@ -1,9 +1,11 @@
 #include "ConcurrentAlloc.h"
 #include "Utils.h"
+#include "Common.h"
 #include <random>
 #include <unordered_map>
+#include <thread>
 
-void AllocTest1(){
+void AllocTest(){
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<size_t> dis(2, 1024);
@@ -13,7 +15,6 @@ void AllocTest1(){
         void* ptr = ConcurrentAlloc(size);
     }
 }
-
 
 void BenchMarkMalloc(size_t nTimes, size_t nThreads, size_t nRounds, size_t objBytes, std::vector<int> lst){
     std::vector<std::thread> threads(nThreads);
@@ -65,24 +66,25 @@ void BenchMarkMalloc(size_t nTimes, size_t nThreads, size_t nRounds, size_t objB
         t.join();
     }
 
-    printf("%u threads concurrent run %u rounds, per round malloc %u times, spend time: %u ms\n",
+    printf("%lu threads concurrent run %lu rounds, per round malloc %lu times, spend time: %lu ms\n",
 		nThreads, nRounds, nTimes, malloc_costTime.load());
-	printf("%u threads concurrent run %u rounds, per round free %u times, spend time: %u ms\n",
+	printf("%lu threads concurrent run %lu rounds, per round free %lu times, spend time: %lu ms\n",
 		nThreads, nRounds, nTimes, free_costTime.load());
-	printf("%u threads concurrent malloc&free %u rounds, total spend time: %u ms\n",
+	printf("%lu threads concurrent malloc&free %lu rounds, total spend time: %lu ms\n",
 		nThreads, nThreads*nRounds*nTimes, malloc_costTime.load() + free_costTime.load());
-    printf("%u threads concurrently and randomly malloc&free %u rounds, per round malloc/free %u times, spend time: %u ms\n",
+    printf("%lu threads concurrently and randomly malloc&free %lu rounds, per round malloc/free %lu times, spend time: %lu ms\n",
         nThreads, nRounds, lst.size()/2, testTime.load() );
 }
 
 void BenchMarkConcurrentMalloc(size_t nTimes, size_t nThreads, size_t nRounds, size_t objBytes, std::vector<int> lst){
-    std::vector<std::thread> threads(nThreads);
+    std::vector<std::thread> myThreads(nThreads);
     std::atomic<size_t> malloc_costTime(0);
     std::atomic<size_t> free_costTime(0);
     std::atomic<size_t> testTime(0);
     
     for(size_t k = 0; k < nThreads; ++k){
-        threads[k] = std::thread(
+        
+        myThreads[k] = std::thread(
             [&, k]() {
                 std::vector<void*> v;
                 v.reserve(nTimes);
@@ -112,7 +114,7 @@ void BenchMarkConcurrentMalloc(size_t nTimes, size_t nThreads, size_t nRounds, s
                         if(lst[i] > 0)
                             ump[lst[i]] = ConcurrentAlloc(lst[i]);
                         else // lst[i] < 0
-                            ConcurrentFree(ump[lst[i]]);
+                            ConcurrentFree(ump[-lst[i]]);
                     }
                     size_t end = clock();
                     testTime += (end - begin);
@@ -121,20 +123,59 @@ void BenchMarkConcurrentMalloc(size_t nTimes, size_t nThreads, size_t nRounds, s
         );
     }
 
-    for(auto& t: threads){
+    for(auto& t: myThreads){
         t.join();
     }
 
-    printf("%u threads concurrent run %u rounds, per round malloc %u times, spend time: %u ms\n",
+    printf("%lu threads concurrent run %lu rounds, per round malloc %lu times, spend time: %lu ms\n",
 		nThreads, nRounds, nTimes, malloc_costTime.load());
-	printf("%u threads concurrent run %u rounds, per round free %u times, spend time: %u ms\n",
+	printf("%lu threads concurrent run %lu rounds, per round free %lu times, spend time: %lu ms\n",
 		nThreads, nRounds, nTimes, free_costTime.load());
-	printf("%u threads concurrent malloc&free %u rounds, total spend time: %u ms\n",
+	printf("%lu threads concurrent malloc&free %lu rounds, total spend time: %lu ms\n",
 		nThreads, nThreads*nRounds*nTimes, malloc_costTime.load() + free_costTime.load());
-    printf("%u threads concurrently and randomly malloc&free %u rounds, per round malloc/free %u times, spend time: %u ms\n",
+    printf("%lu threads concurrently and randomly malloc&free %lu rounds, per round malloc/free %lu times, spend time: %lu ms\n",
         nThreads, nRounds, lst.size()/2, testTime.load() );
 }
 
+void RandomAllocTest(std::vector<int>& lst) {
+    std::unordered_map<int, void*> ump;
+    for (size_t i = 0; i < lst.size(); ++i) {
+        if (lst[i] > 0) {
+            cout << "alloc " << lst[i] << endl;
+            ump[lst[i]] = ConcurrentAlloc(lst[i]);
+        }
+        else // lst[i] < 0
+        {
+            cout << "dealloc " << lst[i] << endl;
+            ConcurrentFree(ump[-lst[i]]);
+        }
+    }
+}
+
+void RandomAllocMutiThreadTest(size_t nThreads, std::vector<int>& lst) {
+    std::vector<std::thread> myThreads(nThreads);
+    for (size_t k = 0; k < nThreads; ++k) {
+        myThreads[k] = std::thread(
+            [&, k]() {
+                std::unordered_map<int, void*> ump;
+                for (size_t i = 0; i < lst.size(); ++i) {
+                    if (lst[i] > 0) {
+                        cout << "thread = " << k << "  alloc " << lst[i] << endl;
+                        ump[lst[i]] = ConcurrentAlloc(lst[i]);
+                    }
+                    else // lst[i] < 0
+                    {
+                        cout << "thread = " << k << "dealloc " << lst[i] << endl;
+                        ConcurrentFree(ump[-lst[i]]);
+                    }
+                }
+            }
+        );
+    }
+    for (auto& t : myThreads) {
+        t.join();
+    }
+}
 
 int main(){
     size_t nThreads = 4;
@@ -144,12 +185,12 @@ int main(){
     size_t len = 1000 * 2;
     std::vector<int> v = GenList(len);
 
-    cout<< "BenchMark Malloc/Free" << endl;
+    cout << "BenchMark Malloc/Free" << endl;
     BenchMarkMalloc(nTimes, nThreads, nRounds, objBytes, v);
 
     cout<< endl << "BenchMark ConcurrentMalloc/ConcurrentFree" << endl;
     BenchMarkConcurrentMalloc(nTimes, nThreads, nRounds, objBytes, v);
 
-    Sleep(2);
+    cout<< "over " << endl;
     return 0;
 }

@@ -14,8 +14,14 @@ Span* PageCache::NewSpan(size_t k){
         return span;
     }
 
-    if(_spanLists[k].Empty() == false)
-        return _spanLists[k].PopFront();
+    // 第k个桶正好不是空的
+    if(_spanLists[k].Empty() == false){ 
+        Span* kSpan = _spanLists[k].PopFront();
+        for(PAGE_ID i = 0; i < kSpan->_n; ++i){
+            _page2SpanMap[kSpan->_pageId + i] = kSpan;
+        }
+        return kSpan;
+    }
     
     // 第k个桶是空的，只能继续向下找
     for(size_t i = k + 1; i < N_PAGES; ++i){

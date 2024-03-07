@@ -159,7 +159,7 @@ public:
         else if (bytes <= 64 * 1024)
             return _Index_by_alignShift(bytes - 8 * 1024, 10) + groupArray[0] + groupArray[1] + groupArray[2];
         else if (bytes <= 256 * 1024)
-            return _Index_by_alignShift(bytes - 64 * 1024, 13) + groupArray[0] + groupArray[1] + groupArray[2] + groupArray[3];
+            return _Index_by_alignShift(bytes - 64 * 1024, 12) + groupArray[0] + groupArray[1] + groupArray[2] + groupArray[3];
         else
         {
             assert(false);

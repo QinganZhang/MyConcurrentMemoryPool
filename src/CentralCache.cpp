@@ -37,6 +37,7 @@ Span* CentralCache::GetOneSpan(SpanList& spanList, size_t alignedBytes){
     spanList._mtx.unlock();
     PageCache::GetInstance()->_pageMtx.lock();
     Span* span = PageCache::GetInstance()->NewSpan(SizeClass::CentralCacheAllocFromPageCache_Num(alignedBytes));
+    span->_isUse = true;
     span->objBytes = alignedBytes;
     // 从page cache中申请得到了一个span，对page cache的操作完成，可以解锁
     PageCache::GetInstance()->_pageMtx.unlock();
@@ -74,7 +75,9 @@ void CentralCache::ReturnRangeObj(void* start, void* end, size_t n, size_t align
     // 因此最好能知道一个内存块应该放到哪一个span中，内存块除以页大小可以知道这个内存块在哪个页上，
     // 因此可以建立页号到span的映射关系
 
-    for(void* next = NextObj(start); start != nullptr; start = next, next = NextObj(next)){
+    // for(void* next = NextObj(start); start != nullptr; start = next, next = NextObj(next)){
+    while(start){
+        void* next = NextObj(start);
         Span* span = PageCache::GetInstance()->MapObj2Span(start);
         NextObj(start) = span->_freeList; // 头插
         span->_freeList = start;
@@ -93,6 +96,7 @@ void CentralCache::ReturnRangeObj(void* start, void* end, size_t n, size_t align
             PageCache::GetInstance()->_pageMtx.unlock();
             _spanLists[index]._mtx.lock();
         }
+        start = next;
     }
     _spanLists[index]._mtx.unlock();
 
