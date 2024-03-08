@@ -18,7 +18,7 @@ public:
             size_t objBytes = sizeof(T) < sizeof(void*) ? sizeof(void*) : sizeof(T);
             if(_remainBytes < objBytes){ // 如果能保证内存大小正好是对象大小的整数倍，则如果进入if语句，则一定是_remainBytes==0
                 _remainBytes = 512 * 1024; // 2^9 * 2^10 = 512KB = 128Page (4KB/Page)
-                _remainBytes = MAX(_remainBytes, SizeClass::RoundUp(objBytes));
+                _remainBytes = MAX(_remainBytes, SizeClass::RoundUp(objBytes)); // 类型T的大小可能超过上面预先设置的512KB（比如基数树的结点）
                 lst.push_front(std::make_pair(_memory, _remainBytes >> PAGE_SHIFT));
                 _memory = (char*)SystemAlloc(_remainBytes >> PAGE_SHIFT); 
                 if(_memory == nullptr) {

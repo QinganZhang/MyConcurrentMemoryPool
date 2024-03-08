@@ -1,3 +1,0 @@
-D:/program/project/MyConcurrentMemoryPool/out/build/x64-Debug/CMakeFiles/ConcurrentMemoryPoolTest.dir
-D:/program/project/MyConcurrentMemoryPool/out/build/x64-Debug/CMakeFiles/edit_cache.dir
-D:/program/project/MyConcurrentMemoryPool/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir

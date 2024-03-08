@@ -29,7 +29,7 @@ private:
 #ifdef _WIN64
     TCMalloc_PageMap3<64 - PAGE_SHIFT> _page2SpanMap; // 使用基数树代替unordered_map
 #elif _WIN32
-    TCMalloc_PageMap3<32 - PAGE_SHIFT> _page2SpanMap;
+    TCMalloc_PageMap2<32 - PAGE_SHIFT> _page2SpanMap;
 #else 
     TCMalloc_PageMap3<64 - PAGE_SHIFT> _page2SpanMap;
 #endif

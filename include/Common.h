@@ -9,6 +9,7 @@
 #include <time.h>
 #include <mutex>
 #include <atomic>
+#include <thread>
 
 using std::cout;
 using std::endl;
@@ -34,7 +35,6 @@ static const size_t N_PAGES = 129; // page Cache哈希桶的个数
 // 宏WIN32, _WIN32, _WIN64的介绍：https://blog.csdn.net/wangkui1331/article/details/103491790
 #ifdef _WIN32 // win32位下只有_WIN32有定义，win64位下_WIN32和_WIN64都有定义
     #include <Windows.h>
-    #include <thread>
 #else // linux
     #include <unistd.h>
     #include <sys/mman.h>

@@ -18,6 +18,7 @@ public:
 
     // 从thread cache中回收n个alignedBytes大小的内存块
     void ReturnRangeObj(void* start, void* end, size_t n, size_t alignedBytes);
+    
 private:
     CentralCache() =default;
     CentralCache(const CentralCache&) =delete;

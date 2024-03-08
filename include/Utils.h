@@ -10,10 +10,10 @@
 using std::cout;
 using std::endl;
 
-std::vector<int> GenList(size_t len, size_t sampleMax = 256 * 1024){
+std::vector<int> GenList(size_t len, size_t sampleMin = 2, size_t sampleMax = 256 * 1024){
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<size_t> dis(2, sampleMax);
+    std::uniform_int_distribution<size_t> dis(sampleMin, sampleMax);
 
     std::vector<int> v;
     v.reserve(2 * len);
