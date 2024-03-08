@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include "ObjectPool.h"
+#include <cstring>
 
 //单层基数树
 template <int BITS>

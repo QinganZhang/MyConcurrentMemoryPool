@@ -32,7 +32,7 @@ void RandomMallocTest(size_t nThreads, size_t nRounds, std::vector<int>& lst, bo
                     totalTime += (clock() - begin);
                     std::ostringstream oss;
                     oss << std::this_thread::get_id() << endl;
-                    if(show) printf("round = %u, thread_id = %s (total %lu threads), malloc/free total %lu times, spend time: %lf ms\n", 
+                    if(show) printf("round = %lu, thread_id = %s (total %lu threads), malloc/free total %lu times, spend time: %lf ms\n", 
                         round, oss.str().c_str(), nThreads, lst.size(), kThreadTestTime.load() / (double)CLOCKS_PER_SEC);
 
                 }
@@ -43,7 +43,7 @@ void RandomMallocTest(size_t nThreads, size_t nRounds, std::vector<int>& lst, bo
         t.join();
     }
 
-    printf(" %lu threads run %u rounds: in each round, thread malloc/free [ %lu / %lu ](per/total) times, total spend time: %lf ms\n", 
+    printf(" %lu threads run %lu rounds: in each round, thread malloc/free [ %lu / %lu ](per/total) times, total spend time: %lf ms\n", 
         nThreads, nRounds, lst.size(), lst.size() * nThreads, totalTime.load() / (double)CLOCKS_PER_SEC);
 }
 
@@ -72,7 +72,7 @@ void RandomConcurrentMallocTest(size_t nThreads, size_t nRounds, std::vector<int
                     totalTime += (clock() - begin);
                     std::ostringstream oss;
                     oss << std::this_thread::get_id() << endl;
-                    if(show) printf("round = %u, thread_id = %s (total %lu threads), concurrently malloc/free total %lu times, spend time: %lf ms\n", 
+                    if(show) printf("round = %lu, thread_id = %s (total %lu threads), concurrently malloc/free total %lu times, spend time: %lf ms\n", 
                         round, oss.str().c_str(), nThreads, lst.size(), kThreadTestTime.load() / (double)CLOCKS_PER_SEC);
                 }
             }
@@ -81,7 +81,7 @@ void RandomConcurrentMallocTest(size_t nThreads, size_t nRounds, std::vector<int
     for (auto& t : myThreads) {
         t.join();
     }
-    printf(" %lu threads run %u rounds: in each round, thread concurrently malloc/free [ %lu / %lu ](per/total) times, total spend time: %lf ms\n", 
+    printf(" %lu threads run %lu rounds: in each round, thread concurrently malloc/free [ %lu / %lu ](per/total) times, total spend time: %lf ms\n", 
         nThreads, nRounds, lst.size(), lst.size() * nThreads, totalTime.load() / (double)CLOCKS_PER_SEC);
 }
 
