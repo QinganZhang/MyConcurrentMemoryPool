@@ -19,6 +19,9 @@ static const size_t MAX_BYTES = 256 * 1024; // 申请内存大小<=MAX_BYTES，�
 static const size_t N_FREE_LISTS = 232; // thread Cache哈希桶的个数
 static const size_t N_PAGES = 129; // page Cache哈希桶的个数
 
+#define MAX(x, y)  ((x) > (y) ? (x) : (y))
+#define MIN(x, y)  ((x) < (y) ? (x) : (y))
+
 // 每个定长内存块的前4个字节或者前8个字节作为next指针，存储下一个定长内存块的地址
 #ifdef _WIN64 
     typedef unsigned long long PAGE_ID;
@@ -191,8 +194,8 @@ public:
     static size_t ThreadCacheAllocFromCentralCache_MaxNum(size_t alignedBytes){
         assert(alignedBytes > 0);
         int num = MAX_BYTES / alignedBytes; 
-        num = std::max(num, 2);
-        num = std::min(num, 512);
+        num = MAX(num, 2);
+        num = MIN(num, 512);
         return num;
     }
 
@@ -203,7 +206,7 @@ public:
         // 应该满足最多blockNum个内存块，换算到Page是pageNum个
         size_t pageNum = blockNum * alignedBytes;
         pageNum >>= PAGE_SHIFT; 
-        return std::max(pageNum, (size_t)(1) );
+        return MAX(pageNum, (size_t)(1) );
     }
 };
 

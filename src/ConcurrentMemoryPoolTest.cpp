@@ -38,8 +38,8 @@ void RandomMallocTest(size_t nThreads, std::vector<int>& lst, bool show = true) 
                 }
                 kThreadTestTime = clock() - begin;
                 totalTime += (clock() - begin);
-                if(show) printf("thread_id = %u (total %lu threads), alloc/dealloc totoal %lu times, spend time: %lu ms\n", 
-                    k, nThreads, lst.size(), kThreadTestTime.load() / CLOCKS_PER_SEC);
+                if(show) printf("thread_id = %lu (total %lu threads), alloc/dealloc totoal %lu times, spend time: %lf ms\n", 
+                    std::this_thread::get_id(), nThreads, lst.size(), kThreadTestTime.load() / (double)CLOCKS_PER_SEC);
             }
         );
     }
@@ -47,8 +47,8 @@ void RandomMallocTest(size_t nThreads, std::vector<int>& lst, bool show = true) 
         t.join();
     }
 
-    printf("total %lu threads, each thread alloc/dealloc total %lu times, total alloc/dealloc %lu times, total spend time: %lu ms\n", 
-        nThreads, lst.size(), lst.size() * nThreads, totalTime.load() / CLOCKS_PER_SEC);
+    printf("total %lu threads, each thread alloc/dealloc total %lu times, total alloc/dealloc %lu times, total spend time: %lf ms\n", 
+        nThreads, lst.size(), lst.size() * nThreads, totalTime.load() / (double)CLOCKS_PER_SEC);
 }
 
 void RandomConcurrentMallocTest(size_t nThreads, std::vector<int>& lst, bool show = true) {
@@ -72,16 +72,36 @@ void RandomConcurrentMallocTest(size_t nThreads, std::vector<int>& lst, bool sho
                     }
                 }
                 totalTime += (clock() - begin);
-                if(show) printf("thread_id = %u (total %lu threads), alloc/dealloc totoal %lu times, spend time: %lu ms\n", 
-                    k, nThreads, lst.size(), kThreadTestTime.load() / CLOCKS_PER_SEC);
+                if(show) printf("thread_id = %lu (total %lu threads), alloc/dealloc totoal %lu times, spend time: %lf ms\n", 
+                    std::this_thread::get_id(), nThreads, lst.size(), kThreadTestTime.load() / (double)CLOCKS_PER_SEC);
             }
         );
     }
     for (auto& t : myThreads) {
         t.join();
     }
-    printf("total %lu threads, each thread alloc/dealloc total %lu times, total alloc/dealloc %lu times, total spend time: %lu ms\n", 
-        nThreads, lst.size(), lst.size() * nThreads, totalTime.load() / CLOCKS_PER_SEC);
+    printf("total %lu threads, each thread alloc/dealloc total %lu times, total alloc/dealloc %lu times, total spend time: %lf ms\n", 
+        nThreads, lst.size(), lst.size() * nThreads, totalTime.load() / (double)CLOCKS_PER_SEC);
+}
+
+void RandomSingleConcurrentMallocTest(std::vector<int>& lst, bool show = true) {
+    std::unordered_map<int, void*> ump;
+    std::atomic<size_t> kThreadTestTime(0);
+    size_t begin = clock();
+    for (size_t i = 0; i < lst.size(); ++i) {
+        if (lst[i] > 0) {
+            if(show) cout << "  alloc " << lst[i] << endl;
+            ump[lst[i]] = ConcurrentAlloc(lst[i]);
+        }
+        else // lst[i] < 0
+        {
+            if(show) cout << "  dealloc " << lst[i] << endl;
+            ConcurrentFree(ump[-lst[i]]);
+        }
+    }
+    kThreadTestTime = clock() - begin;
+    printf("alloc/dealloc totoal %lu times, spend time: %lf ms\n", 
+        lst.size(), kThreadTestTime.load() / (double)CLOCKS_PER_SEC);
 }
 
 int main(){
@@ -90,16 +110,19 @@ int main(){
     size_t nRounds = 5;
     size_t objBytes = 16; 
     size_t len = 2000 * 2;
-    size_t allocMaxBytes = 256 * 1024;
+    size_t allocMaxBytes = 32 * 1024;
     std::vector<int> v = GenList(len / 2, allocMaxBytes);
     
-    cout << "BenchMark Malloc/Free" << endl;
+    cout << endl << "BenchMark " << nThreads << " Threads Malloc/Free" << endl;
     RandomMallocTest(nThreads, v, false);
     // BenchMarkMalloc(nTimes, nThreads, nRounds, objBytes, v);
 
-    cout<< endl << "BenchMark ConcurrentMalloc/ConcurrentFree" << endl;
+    cout << endl << "BenchMark " << nThreads << " Threads ConcurrentMalloc/ConcurrentFree" << endl;
     RandomConcurrentMallocTest(nThreads, v, false);
     // BenchMarkConcurrentMalloc(nTimes, nThreads, nRounds, objBytes, v);
+
+    cout << endl << "BenchMark Single Thread ConcurrentMalloc/ConcurrentFree" << endl;
+    RandomSingleConcurrentMallocTest(v, false);
 
     cout<< "over " << endl;
     return 0;

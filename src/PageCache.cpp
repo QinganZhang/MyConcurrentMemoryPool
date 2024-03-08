@@ -11,6 +11,7 @@ Span* PageCache::NewSpan(size_t k){
         span->_pageId = (PAGE_ID)ptr >> PAGE_SHIFT;
         span->_n = k;
         _page2SpanMap[span->_pageId] = span;
+        // _page2SpanMap.set(span->_pageId, span);
         return span;
     }
 
@@ -19,6 +20,7 @@ Span* PageCache::NewSpan(size_t k){
         Span* kSpan = _spanLists[k].PopFront();
         for(PAGE_ID i = 0; i < kSpan->_n; ++i){
             _page2SpanMap[kSpan->_pageId + i] = kSpan;
+            // _page2SpanMap.set(kSpan->_pageId + i, kSpan);
         }
         return kSpan;
     }
@@ -41,10 +43,13 @@ Span* PageCache::NewSpan(size_t k){
             // 如果该span在某回收span的后面，则使用该span的首页页号map到该span
             _page2SpanMap[span->_pageId] = span;
             _page2SpanMap[span->_pageId + span->_n - 1] = span;
+            // _page2SpanMap.set(span->_pageId, span);
+            // _page2SpanMap.set(span->_pageId + span->_n - 1, span);
 
             // 对于分给central cache的span，建立每一页页号与span的映射
             for(PAGE_ID i = 0; i < kSpan->_n; ++i){
                 _page2SpanMap[kSpan->_pageId + i] = kSpan;
+                // _page2SpanMap.set(kSpan->_pageId + i, kSpan);
             }
             return kSpan;
         }
@@ -66,15 +71,29 @@ Span* PageCache::MapObj2Span(void *obj){
     
     // 如果是在page cache中使用MapObj2Span，因为进入到page cache中会加锁，所以是安全的
     // 但是如果在page cache外使用MapObj2Span，多个线程可能同时使用MapObj2Span
-    std::unique_lock<std::mutex> lock(_pageMtx); // 构造时加锁，析构时解锁
-
+    // std::unique_lock<std::mutex> lock(_pageMtx); // 构造时加锁，析构时解锁
+    
     if(_page2SpanMap.find(pageId) != _page2SpanMap.end())
         return _page2SpanMap[pageId];
-    else {
+    else{
         // 当通过对象的PAGE_ID查询对应的Span时，之前一定有对象所在页与其Span之间的映射关系；如果没有，则表示查询的obj有误
         assert(false);
         return nullptr;
     }
+
+    // Span* ret = (Span*)_page2SpanMap.get(pageId);
+    // assert(ret != nullptr);
+    // return ret;
+
+    // if(ret == nullptr)
+    // if(_page2SpanMap.get(pageId) != nullptr)
+    //     return 
+    // // if(_page2SpanMap.find(pageId) != _page2SpanMap.end())
+    // //     return _page2SpanMap[pageId];
+    // else {
+    //     assert(false);
+    //     return nullptr;
+    // }
 }
 
 void PageCache::ReturnSpanToPageCache(Span* span){
@@ -92,11 +111,16 @@ void PageCache::ReturnSpanToPageCache(Span* span){
     // 向前合并
     while(true){
         PAGE_ID prevPageId = span->_pageId - 1;
+
         if(_page2SpanMap.find(prevPageId) == _page2SpanMap.end()) 
             break; // 前面一页还没有向系统申请过，停止向前合并
+        // Span* prevSpan = (Span*) _page2SpanMap.get(prevPageId);
+        // if(prevSpan == nullptr) break;
+
         Span* prevSpan = _page2SpanMap[prevPageId]; // 前面相邻的一个span
         if(prevSpan->_isUse == true)
             break; // 该span还在central cache中
+        
         if(prevSpan->_n + span->_n >= N_PAGES) 
             break; // 如果合并，则总的页数过大，超出了page cache桶下标的范围
         span->_pageId = prevSpan->_pageId;
@@ -109,8 +133,12 @@ void PageCache::ReturnSpanToPageCache(Span* span){
     // 向后合并
     while(true){
         PAGE_ID nextPageId = span->_pageId + span->_n;
+        
         if(_page2SpanMap.find(nextPageId) == _page2SpanMap.end())
             break; 
+        // Span* nextSpan = (Span*)_page2SpanMap.get(nextPageId);
+        // if(nextSpan == nullptr) break;
+
         Span* nextSpan = _page2SpanMap[nextPageId];
         if(nextSpan->_isUse == true)
             break;
@@ -125,6 +153,8 @@ void PageCache::ReturnSpanToPageCache(Span* span){
     _spanLists[span->_n].PushFront(span);
     _page2SpanMap[span->_pageId] = span;
     _page2SpanMap[span->_pageId + span->_n - 1] = span;
+    // _page2SpanMap.set(span->_pageId, span);
+    // _page2SpanMap.set(span->_pageId + span->_n - 1, span);
     span->_isUse = false;
 
 }

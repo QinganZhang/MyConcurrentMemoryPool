@@ -15,10 +15,10 @@ public:
         }
         else{ // _freeList是空的
             // 定长内存块的大小必须能放得下一个地址（32位是4字节，64位是8字节）
-            size_t objSize = sizeof(T) < sizeof(void*) ? sizeof(void*) : sizeof(T);
-            if(_remainBytes < objSize){
-                // 是否需要先释放掉_memory剩余不够的内存？不需要，最多产生一些小浪费
-                _remainBytes = 128 * 1024; // 2^8 * 2^10 = 128KB = 64Page (4KB/Page)
+            size_t objBytes = sizeof(T) < sizeof(void*) ? sizeof(void*) : sizeof(T);
+            if(_remainBytes < objBytes){ // 如果能保证内存大小正好是对象大小的整数倍，则如果进入if语句，则一定是_remainBytes==0
+                _remainBytes = 512 * 1024; // 2^9 * 2^10 = 512KB = 128Page (4KB/Page)
+                _remainBytes = MAX(_remainBytes, SizeClass::RoundUp(objBytes));
                 lst.push_front(std::make_pair(_memory, _remainBytes >> PAGE_SHIFT));
                 _memory = (char*)SystemAlloc(_remainBytes >> PAGE_SHIFT); 
                 if(_memory == nullptr) {
@@ -27,8 +27,8 @@ public:
             }
             // 现在大块内存肯定是够的
             obj = (T*)_memory;
-            _memory += objSize;
-            _remainBytes -= objSize;
+            _memory += objBytes;
+            _remainBytes -= objBytes;
         }
 
         // obj对象已经分配好了空间，然后需要进行构造，使用定位new进行构造

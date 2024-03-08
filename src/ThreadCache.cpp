@@ -26,7 +26,7 @@ void* ThreadCache::FetchFromCentralCache(FreeList& freeList, size_t alignedBytes
     // thread cache向central cache申请bytes大小的内存块时，该分几个内存块呢？分配的原则为：
     // 1. 刚开始分配时，不管大内存块还是小内存块，都少分一点：_freeLists[index].MaxSize()
     // 2. 后来分配内存时，大内存块分配的上限低一点，小内存块分配的上限高一点：SizeClass::ThreadCacheAllocFromCentralCache_MaxNum(bytes)
-    size_t blockNum = std::min(freeList.MaxSize(), SizeClass::ThreadCacheAllocFromCentralCache_MaxNum(alignedBytes));
+    size_t blockNum = MIN(freeList.MaxSize(), SizeClass::ThreadCacheAllocFromCentralCache_MaxNum(alignedBytes));
     if(blockNum == freeList.MaxSize()){
         freeList.MaxSize() += 1;
     }
