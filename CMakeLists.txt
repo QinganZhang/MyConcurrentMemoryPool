@@ -12,7 +12,10 @@ set(SOURCES
     src/CentralCache.cpp
     src/PageCache.cpp
 )
-aux_source_directory(include/ HEADER_FILES)
+# aux_source_directory(include HEADER_FILES)
+file(GLOB HEADER_FILES "include/*.h")
+# message(STATUS "HEADER_FILES： ${HEADER_FILES}")
+# message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
 
 add_executable(ConcurrentMemoryPoolTest ${SOURCES} src/ConcurrentMemoryPoolTest.cpp )
 message(STATUS "生成可执行文件")
