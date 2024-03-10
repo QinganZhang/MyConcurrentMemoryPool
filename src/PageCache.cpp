@@ -73,17 +73,17 @@ Span* PageCache::MapObj2Span(void *obj){
     // 但是如果在page cache外使用MapObj2Span，多个线程可能同时使用MapObj2Span
     // std::unique_lock<std::mutex> lock(_pageMtx); // 构造时加锁，析构时解锁
     
-    if(_page2SpanMap.find(pageId) != _page2SpanMap.end())
-        return _page2SpanMap[pageId];
-    else{
-        // 当通过对象的PAGE_ID查询对应的Span时，之前一定有对象所在页与其Span之间的映射关系；如果没有，则表示查询的obj有误
-        assert(false);
-        return nullptr;
-    }
+    // if(_page2SpanMap.find(pageId) != _page2SpanMap.end())
+    //     return _page2SpanMap[pageId];
+    // else{
+    //     // 当通过对象的PAGE_ID查询对应的Span时，之前一定有对象所在页与其Span之间的映射关系；如果没有，则表示查询的obj有误
+    //     assert(false);
+    //     return nullptr;
+    // }
 
-    // Span* ret = (Span*)_page2SpanMap.get(pageId);
-    // assert(ret != nullptr);
-    // return ret;
+    Span* ret = _page2SpanMap.get(pageId);
+    assert(ret != nullptr);
+    return ret;
 
     // if(ret == nullptr)
     // if(_page2SpanMap.get(pageId) != nullptr)

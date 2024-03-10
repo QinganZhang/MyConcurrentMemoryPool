@@ -8,10 +8,12 @@
 
 static void* ConcurrentAlloc(size_t bytes){
     if(bytes > MAX_BYTES){ // 向page cache申请，如果申请的内存再>=(N_PAGES-1)*(2^PAGE_SHIFT)，则page cahce中直接向堆申请内存
-        size_t kPage = SizeClass::RoundUp(bytes) >> PAGE_SHIFT; // 需要申请kPage页
+        size_t alignedBytes = SizeClass::RoundUp(bytes);
+        size_t kPage = alignedBytes >> PAGE_SHIFT; // 需要申请kPage页
         
         PageCache::GetInstance()->_pageMtx.lock();
         Span* span = PageCache::GetInstance()->NewSpan(kPage);
+        span->_objBytes = alignedBytes;
         PageCache::GetInstance()->_pageMtx.unlock();
 
         return (void*)(span->_pageId << PAGE_SHIFT);
@@ -46,14 +48,14 @@ static void ConcurrentFree(void* ptr, size_t bytes){
 
 static void ConcurrentFree(void* ptr){
     Span* span = PageCache::GetInstance()->MapObj2Span(ptr);
-    // ConcurrentFree(ptr, span->objBytes);
+    // ConcurrentFree(ptr, span->_objBytes);
 
-    size_t alignedBytes = span->objBytes;
+    size_t alignedBytes = span->_objBytes;
     
     // 如果是申请的大块内存（超过central cache中最大桶所对应的容量），或者是超大块内存（超过page cache中最大桶所对应的容量）
-    // 此时创建span的时候没有初始化objBytes，即为0
+    // 此时创建span的时候没有初始化objBytes，即为0（后来发现是自己写错了）
     // 这种情况进行释放时，同样直接将内存先还给page cache
-    if (alignedBytes == 0) alignedBytes = span->_n << PAGE_SHIFT;
+    // if (alignedBytes == 0) alignedBytes = span->_n << PAGE_SHIFT;
 
     if(alignedBytes > MAX_BYTES){ // 向page cache释放，如果释放的内存再>=(N_PAGES-1)*(2^PAGE_SHIFT)，则page cahce中直接向堆释放内存
         PageCache::GetInstance()->_pageMtx.lock();

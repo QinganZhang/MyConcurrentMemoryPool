@@ -42,8 +42,12 @@ message(STATUS "生成动态链接库和静态链接库")
 
 # 安装动态链接库和静态链接库，cmake构建时使用-DCMAKE_INSTALL_PREFIX=<prefix>来指定安装路径
 # 动态库安装到<prefix>/lib目录下，静态库安装到<prefix>/lib目录下
-install (TARGETS ConcurrentAlloc ConcurrentAlloc_static LIBRARY ARCHIVE)
-# install (TARGETS  )
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+    install (TARGETS ConcurrentAlloc ConcurrentAlloc_static LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static)
+else () # windows
+    install (TARGETS ConcurrentAlloc ConcurrentAlloc_static LIBRARY ARCHIVE)
+endif() 
+
 # 安装头文件, 安装到<prefix>/include目录下
 install (FILES ${HEADER_FILES} TYPE INCLUDE)
 # message(STATUS "安装完成")

@@ -19,7 +19,7 @@ public:
             if(_remainBytes < objBytes){ // 如果能保证内存大小正好是对象大小的整数倍，则如果进入if语句，则一定是_remainBytes==0
                 _remainBytes = 512 * 1024; // 2^9 * 2^10 = 512KB = 128Page (4KB/Page)
                 _remainBytes = MAX(_remainBytes, SizeClass::RoundUp(objBytes)); // 类型T的大小可能超过上面预先设置的512KB（比如基数树的结点）
-                lst.push_front(std::make_pair(_memory, _remainBytes >> PAGE_SHIFT));
+                // lst.push_front(std::make_pair(_memory, _remainBytes >> PAGE_SHIFT));
                 _memory = (char*)SystemAlloc(_remainBytes >> PAGE_SHIFT); 
                 if(_memory == nullptr) {
                     throw std::bad_alloc();
@@ -44,15 +44,15 @@ public:
         _freeList = obj;
     }
 
-    ~ObjectPool(){
-        for(auto& it: lst){
-            SystemFree(it.first, it.second); // 析构函数中显式将每次申请的大块内存释放
-        }
-    }
+    // ~ObjectPool(){
+        // for(auto& it: lst){
+        //     SystemFree(it.first, it.second); // 析构函数中显式将每次申请的大块内存释放
+        // }
+    // }
 
 private:
     char* _memory = nullptr; // 指向大块内存的指针
     size_t _remainBytes = 0; // 大块内存在切分过程中剩余的字节数量 
     void *_freeList = nullptr; // 释放回来的定长内存块组成的链表的指针
-    std::list<std::pair<char*, size_t>> lst; // 记录不断创建的大块内存及其大小，用于销毁内存池时的释放
+    // std::list<std::pair<char*, size_t>> lst; // 记录不断创建的大块内存及其大小，用于销毁内存池时的释放
 };

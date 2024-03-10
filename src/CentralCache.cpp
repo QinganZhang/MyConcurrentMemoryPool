@@ -38,7 +38,7 @@ Span* CentralCache::GetOneSpan(SpanList& spanList, size_t alignedBytes){
     PageCache::GetInstance()->_pageMtx.lock();
     Span* span = PageCache::GetInstance()->NewSpan(SizeClass::CentralCacheAllocFromPageCache_Num(alignedBytes));
     span->_isUse = true;
-    span->objBytes = alignedBytes;
+    span->_objBytes = alignedBytes;
     // 从page cache中申请得到了一个span，对page cache的操作完成，可以解锁
     PageCache::GetInstance()->_pageMtx.unlock();
 

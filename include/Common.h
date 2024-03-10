@@ -222,7 +222,7 @@ struct Span{
 
 	size_t _useCount = 0;       //切好的小块内存，被分配给thread cache的计数。如果计数为0，代表当前span切出去的内存块都还回来了，因此central cache可以再将这个span还给page cache
 	void* _freeList = nullptr;  //切好的小块内存的自由链表
-    size_t objBytes = 0;    // 切好的小块内存的大小
+    size_t _objBytes = 0;    // 切好的小块内存的大小
 
     bool _isUse = false; // if true, span is on central cache; if false, span is on page cache
         // page cache 回收得到一个span时，尝试将相邻的span合并起来，前提是相邻的span在page cache中
