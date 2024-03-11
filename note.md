@@ -148,7 +148,7 @@ inline static void* SystemAlloc(size_t kpage){
   thread cache 支持小于等于 256KB 内存的申请，如果我们将每种字节数的内存块都用一个自由链表进行管理的话，那么此时我们就需要 20 多万个自由链表，光是存储这些自由链表的头指针就需要消耗大量内存，这显然是得不偿失的。
 
   这时我们可以选择做一些平衡的牺牲，让这些字节数按照某种规则进行对齐，小内存使用密集方式对齐，大内存使用稀疏方式对齐。例如我们让这些字节数都按照 8 字节进行向上对齐，那么 thread cache 的结构就是下面这样的，此时当线程申请 1~8 字节的内存时会直接给出 8 字节，而当线程申请 9~16 字节的内存时会直接给出 16 字节，以此类推。  
-<img src="assets/1710122715577.png" style="zoom:50%;" />  
+<img src="https://cdn.jsdelivr.net/gh/QinganZhang/ImageHosting/img/2024-03-11-21:06:06.png" style="zoom:50%;" />  
   因此当线程要申请某一大小的内存块时，基于某种对齐规则，计算出对齐后的内存块大小，进而找到对应的哈希桶，如果该哈希桶中的自由链表中有内存块，那就从自由链表中头删一个内存块进行返回；如果该自由链表已经为空了，那么就需要向下一层的 central cache 进行获取了。
 
 > 对齐规则：如果申请一定大小（bytes）的内存块，对齐后的内存块多大？对齐后的内存块在哪个桶中？
@@ -194,7 +194,7 @@ static thread_local ThreadCache* pTLSThreadCache = nullptr;
 
     - thread cache 的每个桶中挂的是一个个切好的内存块，而 central cache 的每个桶中挂的是一个个的 span。
 
-        <img src="assets/1710122715775.png" style="zoom:40%;" />
+        <img src="https://cdn.jsdelivr.net/gh/QinganZhang/ImageHosting/img/2024-03-11-21:06:14.png" style="zoom:40%;" />
 
 ###### 数据结构（类的数据成员）
 
@@ -363,7 +363,7 @@ static thread_local ThreadCache* pTLSThreadCache = nullptr;
 
     ​		单层基数树实际采用的就是直接定址法，每一个页号对应 span 的地址就存储数组中在以该页号为下标的位置。最坏的情况下我们需要建立所有页号与其 span 之间的映射关系，因此这个数组中元素个数应该与页号的数目相同，数组中每个位置存储的就是对应 span 的指针。
 
-    <img src="assets/1710122718250.png" style="zoom: 30%;" />
+    <img src="https://cdn.jsdelivr.net/gh/QinganZhang/ImageHosting/img/2024-03-11-21:06:24.png" style="zoom: 30%;" />
 
 - 二层基数树
 
