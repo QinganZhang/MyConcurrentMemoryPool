@@ -189,6 +189,26 @@ public:
         // 位运算写法: 应该传入的是alignShift, 比如alignNum = 8, 因此alignShift = 3
         return ((bytes + (1 << alignShift) - 1) >> alignShift) - 1;
     }
+    
+    // 从桶的index获取桶的alignedBytes
+    static inline size_t GetAlignedBytes(size_t index){
+        ++index;
+        // const size_t groupArray[4] = { 16, 56, 56, 56 };
+        if(index <= 16)
+            return index * 8;
+        else if (index <= 72)
+            return 128 + (index-16) * 16;
+        else if (index <= 128)
+            return 128 + 56 * 16 + (index-128) * 128;
+        else if (index <= 184)
+            return 128 + 56 * 16 + 56 * 128 + (index-184) * 1024;
+        else if (index <= 232)
+            return 128 + 56 * 16 + 56 * 128 + (index - 232) * 4 * 1024;
+        else {
+            assert(false);
+            return -1;
+        }
+    }
 
     // thread cache向central cache申请内存时，申请的内存块大小是alignedBytes，应该分配内存块的数量上限
     static size_t ThreadCacheAllocFromCentralCache_MaxNum(size_t alignedBytes){

@@ -6,6 +6,8 @@
 #include "ObjectPool.h"
 #include "Utils.h"
 
+thread_local ThreadCache* pTLSThreadCache = nullptr;
+
 static void* ConcurrentAlloc(size_t bytes){
     if(bytes > MAX_BYTES){ // 向page cache申请，如果申请的内存再>=(N_PAGES-1)*(2^PAGE_SHIFT)，则page cahce中直接向堆申请内存
         size_t alignedBytes = SizeClass::RoundUp(bytes);

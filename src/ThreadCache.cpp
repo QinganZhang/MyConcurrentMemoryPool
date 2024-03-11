@@ -49,3 +49,16 @@ void ThreadCache::ReturnBackToCentralCache(FreeList& freeList, size_t alignedByt
     freeList.PopRange(start, end, freeList.MaxSize());
     CentralCache::GetInstance()->ReturnRangeObj(start, end, freeList.MaxSize(), alignedBytes);
 }
+
+void ThreadCache::ClearFreeList(FreeList& freeList, size_t alignedBytes){
+    if(freeList.Empty()) return ;
+    void *start = nullptr, *end = nullptr;
+    freeList.PopRange(start, end, freeList.Size());
+    CentralCache::GetInstance()->ReturnRangeObj(start, end, freeList.Size(), alignedBytes);
+}
+
+ThreadCache::~ThreadCache(){
+    for(int i = 0; i < N_FREE_LISTS; ++i){
+        ClearFreeList(_freeLists[i], SizeClass::GetAlignedBytes(i));
+    }
+}

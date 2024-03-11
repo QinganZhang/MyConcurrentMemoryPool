@@ -107,14 +107,14 @@ void RandomSingleConcurrentMallocTest(std::vector<int>& lst, bool show = true) {
 }
 
 int main(){
-    size_t nThreads = 1;
+    size_t nThreads = 8;
     size_t nRounds = 2;
     // size_t objBytes = 16;
 
     size_t len = 10000 * 2;
     size_t allocMinBytes = 2;
     size_t allocMaxBytes = 1024 * 1024; 
-    double ratio = 0.05;
+    double ratio = 0.02;
     double mean = 1024; // 1KB
     double std = 100;
     size_t maxAllocThreshold = 128 * 1024 * 1024; 
