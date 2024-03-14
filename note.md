@@ -413,7 +413,7 @@ Span* PageCache::MapObj2Span(void* obj) //获取从对象到span的映射
 申请内存过程分析
 ----------------
 
-![图片1](https://cdn.jsdelivr.net/gh/QinganZhang/ImageHosting/img/2024-03-11-20:42:40.png)
+![图片1](https://cdn.jsdelivr.net/gh/QinganZhang/ImageHosting/img/2024-03-13-19:37:50.png)
 
 
 释放内存过程分析
@@ -422,3 +422,19 @@ Span* PageCache::MapObj2Span(void* obj) //获取从对象到span的映射
 ![图片2](https://cdn.jsdelivr.net/gh/QinganZhang/ImageHosting/img/2024-03-11-21:01:59.png)
 
    
+
+
+
+reference: 
+
+[【项目设计】高并发内存池](https://blog.csdn.net/chenlong_cxy/article/details/122819562?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522170921315216800182710220%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=170921315216800182710220&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-1-122819562-null-null.142^v99^pc_search_result_base9&utm_term=%E9%AB%98%E5%B9%B6%E5%8F%91%E5%86%85%E5%AD%98%E6%B1%A0&spm=1018.2226.3001.4449)
+
+[高并发内存池](https://blog.csdn.net/m0_60338933/category_12216667.html)
+
+[【项目】九万字手把手教你写高并发内存池（化简版tcmalloc）](https://blog.csdn.net/m0_62782700/article/details/135443352?spm=1001.2014.3001.5502)
+
+[林慢慢concurrent memory pool](https://gitee.com/linkylo/concurrent-memorypoll)
+
+[Linux core dump文件设置以及查看](https://blog.csdn.net/zhang197093/article/details/108888303)
+
+[bash: /proc/sys/kernel/core_pattern: Permission denied](https://blog.csdn.net/f_day999/article/details/124419662)
